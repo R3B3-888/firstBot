@@ -8,6 +8,7 @@ except ImportError:
 
 import settings
 
+
 def test_capture(show_windows):
     print("The test on capture processing ...")
     
@@ -18,5 +19,6 @@ def test_capture(show_windows):
 
     #LeftMotor = Motor(IDLEFT)
     #RightMotor = Motor(IDRIGHT)
-    
+
+
 test_capture(sys.argv[1])
