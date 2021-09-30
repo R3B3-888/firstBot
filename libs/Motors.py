@@ -1,5 +1,6 @@
 import pypot.dynamixel as dyn
 import math
+import time 
 
 IDLEFT = 2
 IDRIGHT = 5
