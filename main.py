@@ -2,7 +2,7 @@ import sys
 from scripts.line_following import line_following
 from scripts.go_to import go_to_xya
 from scripts.drawing_the_map import draw_the_map
-from settings import *
+from constants import *
 
 
 def get_chosen_goal(goal):
@@ -26,7 +26,7 @@ def is_map_drawing_accepted():
 
 def launch_chosen_goal(goal):
     if goal == '1':
-        goal = '4' if is_map_drawing_accepted() else "End"
+        # goal = '4' if is_map_drawing_accepted() else "End"
         line_following()
     if goal == '2':
         go_to_xya(2, 4, 2)
@@ -49,5 +49,5 @@ def main(argc=len(sys.argv), argv=sys.argv):
     get_chosen_goal(goal)
     launch_chosen_goal(goal)
 
-
-main()
+if __name__ == "__main__":
+        main()
