@@ -13,4 +13,6 @@ if not ports:
 	exit('No port')
 
 dxl_io = Motors(ports[0])
-dxl_io.rotate_angle_clockwise(90)
+dxl_io.go_forward()
+time.sleep(2)
+dxl_io.rotate_angle_clockwise(1.5708)
