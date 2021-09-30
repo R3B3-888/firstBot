@@ -14,6 +14,9 @@ class Capture:
     _lower_yellow = np.array([20, 50, 50])
     _upper_yellow = np.array([40, 255, 255])
 
+    _actual_mask = None
+    _path_color = "Blue"
+
     def __init__(self, cam_id):
         print("Camera Object created")
         self._camera_id = cam_id
@@ -21,12 +24,12 @@ class Capture:
     def _colored_mask(self, image, lower_color, upper_color):
         return cv.inRange(image, lower_color, upper_color)
 
-    def _direction(self, mask):
-        width = mask.shape[0]
+    def get_direction(self):
+        width = self._actual_mask.shape[0]
         mask_mean = width // 2
 
-        left_weight = mask[:, :mask_mean].sum(dtype=np.int32)
-        right_weight = mask[:, mask_mean:].sum(dtype=np.int32)
+        left_weight = self._actual_mask[:, :mask_mean].sum(dtype=np.int32)
+        right_weight = self._actual_mask[:, mask_mean:].sum(dtype=np.int32)
 
         return (left_weight - right_weight) / (left_weight + right_weight + 1)
 
@@ -40,20 +43,15 @@ class Capture:
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
 
-            blue_img_cpy = np.copy(frame)
-            red_img_cpy = np.copy(frame)
-            yellow_img_cpy = np.copy(frame)
+            blue_mask = self._mask_processing(frame, self._lower_blue, self._upper_blue)            
+            yellow_mask = self._mask_processing(frame, self._lower_yellow, self._upper_yellow)
+            red_mask = self._red_mask_processing(frame)
+            # if turn % 2 == True : 
+            #     self._actual_mask = blue_mask
+            # else:
+            #     self.actual_mask = red_mask
+            
 
-            hsv_blue = cv.cvtColor(blue_img_cpy, cv.COLOR_BGR2HSV)
-            hsv_red = cv.cvtColor(red_img_cpy, cv.COLOR_BGR2HSV)
-            hsv_yellow = cv.cvtColor(yellow_img_cpy, cv.COLOR_BGR2HSV)
-
-            blue_mask = self._colored_mask(hsv_blue, self._lower_blue, self._upper_blue)
-            red_mask0 = self._colored_mask(hsv_red, self._lower_red0, self._upper_red0)
-            red_mask1 = self._colored_mask(hsv_red, self._lower_red1, self._upper_red1)
-            red_mask = red_mask0 + red_mask1
-            hsv_red[np.where(red_mask == 0)] = 0
-            yellow_mask = self._colored_mask(hsv_yellow, self._lower_yellow, self._upper_yellow)
 
             if enable_windows:
                 cv.imshow("Blue_mask", blue_mask)
@@ -67,6 +65,23 @@ class Capture:
         capture.release()
         cv.destroyAllWindows()
 
-    #    def get_direction(self)
+    def has_cross_yellow_line(self):
+        # calcul de la détection
+        # return True
+        # turn += 1
+        pass
 
-#    def get_angle(self)
+    def _mask_processing(self, frame, lower_color, upper_color):
+            img_cpy = np.copy(frame)
+            hsv = cv.cvtColor(img_cpy, cv.COLOR_BGR2HSV)
+            mask = self._colored_mask(hsv, lower_color, upper_color)
+            return mask
+
+    def _red_mask_processing(self, frame):
+            img_cpy = np.copy(frame)
+            hsv = cv.cvtColor(img_cpy, cv.COLOR_BGR2HSV)
+            mask0 = self._colored_mask(hsv, self._lower_red0, self._upper_red0)
+            mask1 = self._colored_mask(hsv, self._lower_red1, self._upper_red1)
+            mask = mask0 + mask1
+            hsv[np.where(mask == 0)] = 0
+            return mask
