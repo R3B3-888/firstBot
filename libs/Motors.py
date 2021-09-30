@@ -1,8 +1,12 @@
 import pypot.dynamixel as dyn
+import math
 
 IDLEFT = 2
 IDRIGHT = 5
 SPEED = 360 
+
+radius_wheel = 2.6 #in cm
+radius_between_wheels = 16.6 #in cm 
 #Motors, dyn.DxlIO subclass
 class Motors(dyn.DxlIO):
 	
@@ -29,12 +33,12 @@ class Motors(dyn.DxlIO):
 		distance_rotation = (angle*perimeter_circunference_robot)/360
 		distance_rotation/=2
 		#we need the speed of the wheel
-		v_rad = v*math.pi/180
+		v_rad = SPEED*math.pi/180
 
 		speed = v_rad * radius_wheel
 		times = distance_rotation/speed
 		print(times, speed, distance_rotation)
 		#set the timer
-		self.set_moving_speed({idLeft: v, idRight: v})
+		self.set_moving_speed({IDLEFT: SPEED, IDRIGHT: SPEED})
 		time.sleep(times)
 		self.stop()
