@@ -21,3 +21,20 @@ class Motors(dyn.DxlIO):
 	#Turn to the right
 	def turn_right(self):
 		self.set_moving_speed({IDLEFT: SPEED*1.2, IDRIGHT: -SPEED*0.8})
+	def rotate_angle_clockwise(self,angle):
+		angle = angle*180/math.pi
+		#move the left wheel but not the right
+		perimeter_circunference_robot = 2*math.pi*radius_between_wheels
+		perimeter_circunference_wheel = 2*math.pi*radius_wheel
+		distance_rotation = (angle*perimeter_circunference_robot)/360
+		distance_rotation/=2
+		#we need the speed of the wheel
+		v_rad = v*math.pi/180
+
+		speed = v_rad * radius_wheel
+		times = distance_rotation/speed
+		print(times, speed, distance_rotation)
+		#set the timer
+		self.set_moving_speed({idLeft: v, idRight: v})
+		time.sleep(times)
+		self.stop()
