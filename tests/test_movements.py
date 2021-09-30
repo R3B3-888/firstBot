@@ -1,4 +1,9 @@
-from libs.Motors import *
+try:
+    from libs.Motors import *
+except ImportError:
+    
+    sys.path.append(sys.path[0] + '/..')
+    from libs.Motors import *
 import pypot.dynamixel as dyn
 import time
 
