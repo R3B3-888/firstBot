@@ -1,4 +1,4 @@
-from motors import Motors
+from Motors import Motors
 import pypot.dynamixel as dyn
 import time
 
