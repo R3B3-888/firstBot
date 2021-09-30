@@ -21,11 +21,11 @@ class Motors(dyn.DxlIO):
 	def turn(self, kl: float, kr: float):
 		self.set_moving_speed({IDLEFT: SPEED*kl, IDRIGHT: -SPEED*kr})
 	#Turn to the left
-	def turn_left(self):
-		self.set_moving_speed({IDLEFT: SPEED*0.8, IDRIGHT: -SPEED*1.2})
+	def turn_left(self,d):
+		self.set_moving_speed({IDLEFT: SPEED*(d+1), IDRIGHT: -SPEED})
 	#Turn to the right
-	def turn_right(self):
-		self.set_moving_speed({IDLEFT: SPEED*1.2, IDRIGHT: -SPEED*0.8})
+	def turn_right(self,d):
+		self.set_moving_speed({IDLEFT: SPEED, IDRIGHT: -SPEED*(1-d)})
 	def rotate_angle_clockwise(self,angle):
 		angle = angle*180/math.pi
 		#move the left wheel but not the right
