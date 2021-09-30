@@ -1,3 +1,4 @@
+import sys
 try:
     from libs.Motors import *
 except ImportError:
