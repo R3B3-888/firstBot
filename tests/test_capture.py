@@ -9,10 +9,10 @@ except ImportError:
 import settings
 
 
-def test_capture(show_windows):
+def test_capture(show_windows, path):
     print("The test on capture processing ...")
     
-    Camera = Capture(0)
+    Camera = Capture(0, path)
     Camera.capture_video(show_windows)
 
     #Camera.get_angle()
@@ -20,5 +20,6 @@ def test_capture(show_windows):
     #LeftMotor = Motor(IDLEFT)
     #RightMotor = Motor(IDRIGHT)
 
+test_path = np.array(["blue", "red", "yellow"])
 
-test_capture(sys.argv[1])
+test_capture(sys.argv[1], test_path)

@@ -13,18 +13,27 @@ class Capture:
     _upper_red1 = np.array([180, 255, 255])
     _lower_yellow = np.array([20, 50, 50])
     _upper_yellow = np.array([40, 255, 255])
+    _lower_starting_color = _lower_yellow
+    _upper_starting_color = _upper_yellow
 
     _actual_mask = None
-    _path_color = "Blue"
+    _starting_mask = None
+    _path_color = None
+    _starting_color = None
 
-    def __init__(self, cam_id):
+
+    def __init__(self, cam_id, path_color):
         print("Camera Object created")
         self._camera_id = cam_id
+        self._path_color = path_color
+        self._starting_color = path_color[len(path_color)-1]
+
 
     def _colored_mask(self, image, lower_color, upper_color):
         return cv.inRange(image, lower_color, upper_color)
 
-    def get_direction(self):
+
+    def _get_direction(self):
         width = self._actual_mask.shape[0]
         mask_mean = width // 2
 
@@ -32,6 +41,7 @@ class Capture:
         right_weight = self._actual_mask[:, mask_mean:].sum(dtype=np.int32)
 
         return (left_weight - right_weight) / (left_weight + right_weight + 1)
+
 
     def capture_video(self, enable_windows):
         print("capturing")
@@ -43,45 +53,63 @@ class Capture:
                 print("Can't receive frame (stream end?). Exiting ...")
                 break
 
-            blue_mask = self._mask_processing(frame, self._lower_blue, self._upper_blue)            
-            yellow_mask = self._mask_processing(frame, self._lower_yellow, self._upper_yellow)
-            red_mask = self._red_mask_processing(frame)
-            # if turn % 2 == True : 
-            #     self._actual_mask = blue_mask
-            # else:
-            #     self.actual_mask = red_mask
-            
+            if self._path_color[0] == "blue":
+                blue_mask = self._mask_processing(frame, self._lower_blue, self._upper_blue, False)
 
+            elif self._path_color[0] == "red":
+                red_mask = self._red_mask_processing(frame, False)
+            else:
+                yellow_mask = self._mask_processing(frame, self._lower_yellow, self._upper_yellow, False)
 
-            if enable_windows:
-                cv.imshow("Blue_mask", blue_mask)
-                cv.imshow("Red_mask", red_mask)
-                cv.imshow("Yellow_mask", yellow_mask)
+            self._starting_mask = self._mask_processing(frame, self._lower_starting_color, self._upper_starting_color, True)
 
+            # Shows the actual image processed
+            self._enable_windows(enable_windows)
 
-            # if key 'q' is press, close the windows and close
+            # if key 'q' is pressed, close the windows and close
             if cv.waitKey(1) & 0xFF == ord('q'):
                 break
+
         capture.release()
         cv.destroyAllWindows()
 
-    def has_cross_yellow_line(self):
+
+    def _enable_windows(self, enable_windows):
+        if enable_windows:
+            cv.imshow("Window", self._actual_mask)
+            cv.imshow("Starting_point", self._starting_mask)
+
+
+    def _has_crossed_starting_line(self, frame):
         # calcul de la détection
         # return True
         # turn += 1
-        pass
+        
 
-    def _mask_processing(self, frame, lower_color, upper_color):
+        return
+
+
+    def _actualize_mask(self, mask, is_starting_color):
+        if not is_starting_color:
+            self._actual_mask = mask
+        else:
+            self._starting_mask = mask
+
+
+    def _mask_processing(self, frame, lower_color, upper_color, is_starting_color):
             img_cpy = np.copy(frame)
             hsv = cv.cvtColor(img_cpy, cv.COLOR_BGR2HSV)
             mask = self._colored_mask(hsv, lower_color, upper_color)
+            self._actualize_mask(mask, is_starting_color)
             return mask
 
-    def _red_mask_processing(self, frame):
+
+    def _red_mask_processing(self, frame, is_starting_color):
             img_cpy = np.copy(frame)
             hsv = cv.cvtColor(img_cpy, cv.COLOR_BGR2HSV)
             mask0 = self._colored_mask(hsv, self._lower_red0, self._upper_red0)
             mask1 = self._colored_mask(hsv, self._lower_red1, self._upper_red1)
             mask = mask0 + mask1
             hsv[np.where(mask == 0)] = 0
+            self._actualize_mask(mask, is_starting_color)
             return mask
