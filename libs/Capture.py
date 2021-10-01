@@ -43,7 +43,7 @@ class Capture:
         left_weight = self._actual_mask[:, :mask_mean].sum(dtype=np.int32)
         right_weight = self._actual_mask[:, mask_mean:].sum(dtype=np.int32)
 
-        return (left_weight - right_weight) / (left_weight + right_weight + 1)
+        return (right_weight - left_weight) / (left_weight + right_weight + 1)
 
 
     def _capture_frame(self, enable_windows):
