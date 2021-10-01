@@ -35,7 +35,8 @@ class Capture:
         return cv.inRange(image, lower_color, upper_color)
 
 
-    def _get_direction(self):
+    def get_direction(self, enable_windows):
+        self._capture_frame(enable_windows)
         width = self._actual_mask.shape[0]
         mask_mean = width // 2
 
@@ -73,7 +74,10 @@ class Capture:
         print("capturing")
         return cv.VideoCapture(self._camera_id)
 
-    def _stop_capturing(self):
+    def stop_capturing(self):
+        self._camera_frame.release()
+
+    def stop_all(self):
         self._camera_frame.release()
         cv.destroyAllWindows()
 
@@ -104,26 +108,30 @@ class Capture:
 
 
     def _mask_processing(self, frame, lower_color, upper_color, is_starting_color):
-            img_cpy = np.copy(frame)
-            hsv = cv.cvtColor(img_cpy, cv.COLOR_BGR2HSV)
-            mask = self._colored_mask(hsv, lower_color, upper_color)
-            self._actualize_mask(mask, is_starting_color)
-            return mask
+        img_cpy = np.copy(frame)
+        hsv = cv.cvtColor(img_cpy, cv.COLOR_BGR2HSV)
+        mask = self._colored_mask(hsv, lower_color, upper_color)
+        self._actualize_mask(mask, is_starting_color)
+        return mask
 
 
     def _red_mask_processing(self, frame, is_starting_color):
-            img_cpy = np.copy(frame)
-            hsv = cv.cvtColor(img_cpy, cv.COLOR_BGR2HSV)
-            mask0 = self._colored_mask(hsv, self._lower_red0, self._upper_red0)
-            mask1 = self._colored_mask(hsv, self._lower_red1, self._upper_red1)
-            mask = mask0 + mask1
-            hsv[np.where(mask == 0)] = 0
-            self._actualize_mask(mask, is_starting_color)
-            return mask
+        img_cpy = np.copy(frame)
+        hsv = cv.cvtColor(img_cpy, cv.COLOR_BGR2HSV)
+        mask0 = self._colored_mask(hsv, self._lower_red0, self._upper_red0)
+        mask1 = self._colored_mask(hsv, self._lower_red1, self._upper_red1)
+        mask = mask0 + mask1
+        hsv[np.where(mask == 0)] = 0
+        self._actualize_mask(mask, is_starting_color)
+        return mask
 
     def _switch_color_path(self):
         if self._has_crossed_starting_line():
             if len(self._path_color) > 2:
                 np.delete(self._path_color, 0)
-            # else:
-                
+        return
+
+    def is_interrupted_key_pressed(self, key):
+        if cv.waitKey(1) & 0xFF == ord(key):
+            return True
+        return False

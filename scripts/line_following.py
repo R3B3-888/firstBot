@@ -11,10 +11,10 @@ from constants import *
 import sys
 
 try:
-    from libs import Capture, Motors
+    from libs import Capture, Motion
 except ImportError:
     sys.path.append(sys.path[0] + '/..')
-    from libs import Capture, Motors
+    from libs import Capture, Motion
 
 
 def line_following():
@@ -22,10 +22,10 @@ def line_following():
     
     Camera = Capture.Capture(0, ORDER_COLORS_PATH)
     #ports = dyn.get_available_ports()
-    #Bot = Motors.Motors(ports[0])
+    #Bot = Motion.Motion(ports[0])
     
     while(True):
-        direction = Camera.get_direction() # value between -1 (left) and 1 (right) (0 you dont move)
+        direction = Camera.get_direction(True) # value between -1 (left) and 1 (right) (0 you dont move)
         #Bot.turn(direction)
         if Camera.is_interrupted_key_pressed(KEY):
             Camera.stop_all()
