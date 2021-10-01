@@ -3,7 +3,6 @@ import cv2 as cv
 
 
 class Capture:
-    _camera_id = 0
 
     _lower_blue = np.array([100, 100, 100])
     _upper_blue = np.array([140, 255, 255])
@@ -15,18 +14,21 @@ class Capture:
     _upper_yellow = np.array([40, 255, 255])
     _lower_starting_color = _lower_yellow
     _upper_starting_color = _upper_yellow
-
+    
+    _camera_id = None
+    _camera_frame = None # 1 frame of the camera
     _actual_mask = None
     _starting_mask = None
     _path_color = None
-    _starting_color = None
+    _switch_color = None
 
 
     def __init__(self, cam_id, path_color):
         print("Camera Object created")
         self._camera_id = cam_id
+        self._camera_frame = self._start_capturing()
         self._path_color = path_color
-        self._starting_color = path_color[len(path_color)-1]
+        self._switch_color = path_color[len(path_color)-1]
 
 
     def _colored_mask(self, image, lower_color, upper_color):
@@ -43,34 +45,36 @@ class Capture:
         return (left_weight - right_weight) / (left_weight + right_weight + 1)
 
 
-    def capture_video(self, enable_windows):
+    def _capture_frame(self, enable_windows):
+        
+        img_returned, frame = self._camera_frame.read()
+
+        if not img_returned:
+            print("Can't receive frame (stream end?). Exiting ...")
+            self._stop_capturing()
+
+        if self._path_color[0] == "blue":
+            blue_mask = self._mask_processing(frame, self._lower_blue, self._upper_blue, False)
+
+        elif self._path_color[0] == "red":
+            red_mask = self._red_mask_processing(frame, False)
+        else:
+            yellow_mask = self._mask_processing(frame, self._lower_yellow, self._upper_yellow, False)
+
+        self._starting_mask = self._mask_processing(frame, self._lower_starting_color, self._upper_starting_color, True)
+
+        self._switch_color_path()
+
+        # Shows the actual image processed
+        self._enable_windows(enable_windows)
+
+
+    def _start_capturing(self):
         print("capturing")
-        capture = cv.VideoCapture(self._camera_id)
-        while True:
-            img_returned, frame = capture.read()
+        return cv.VideoCapture(self._camera_id)
 
-            if not img_returned:
-                print("Can't receive frame (stream end?). Exiting ...")
-                break
-
-            if self._path_color[0] == "blue":
-                blue_mask = self._mask_processing(frame, self._lower_blue, self._upper_blue, False)
-
-            elif self._path_color[0] == "red":
-                red_mask = self._red_mask_processing(frame, False)
-            else:
-                yellow_mask = self._mask_processing(frame, self._lower_yellow, self._upper_yellow, False)
-
-            self._starting_mask = self._mask_processing(frame, self._lower_starting_color, self._upper_starting_color, True)
-
-            # Shows the actual image processed
-            self._enable_windows(enable_windows)
-
-            # if key 'q' is pressed, close the windows and close
-            if cv.waitKey(1) & 0xFF == ord('q'):
-                break
-
-        capture.release()
+    def _stop_capturing(self):
+        self._camera_frame.release()
         cv.destroyAllWindows()
 
 
@@ -80,13 +84,16 @@ class Capture:
             cv.imshow("Starting_point", self._starting_mask)
 
 
-    def _has_crossed_starting_line(self, frame):
+    def _has_crossed_starting_line(self):
         # calcul de la détection
         # return True
         # turn += 1
-        
+        width = self._starting_mask.shape[0]
+        height = self._starting_mask.shape[1]
 
-        return
+        weight = self._starting_mask[:,:].sum(dtype=np.int32)
+
+        return weight > 1280000
 
 
     def _actualize_mask(self, mask, is_starting_color):
@@ -113,3 +120,10 @@ class Capture:
             hsv[np.where(mask == 0)] = 0
             self._actualize_mask(mask, is_starting_color)
             return mask
+
+    def _switch_color_path(self):
+        if self._has_crossed_starting_line():
+            if len(self._path_color) > 2:
+                np.delete(self._path_color, 0)
+            # else:
+                
