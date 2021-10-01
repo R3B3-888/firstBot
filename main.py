@@ -1,6 +1,7 @@
 import sys
 from scripts.line_following import line_following
 from scripts.go_to import go_to_xya
+from scripts import run_odometry
 from scripts.drawing_the_map import draw_the_map
 from constants import *
 
@@ -32,6 +33,7 @@ def launch_chosen_goal(goal):
         go_to_xya(2, 4, 2)
     if goal == '3':
         print("Odometry is chosen")
+        run_odometry()
     if goal == '4':
         draw_the_map()
     print("End of the ride")
