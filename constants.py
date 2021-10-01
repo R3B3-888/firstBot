@@ -8,7 +8,7 @@ WHEEL_RADIUS = 2.6  # cm
 DIST_LWHEEL_RWHEEL = 16.1  # cm
 
 # line following
-
+KEY = 'q'
 ORDER_COLORS_PATH = np.array(["blue", "red", "yellow"])
 
 # go to
