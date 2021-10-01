@@ -9,8 +9,10 @@ DIST_LWHEEL_RWHEEL = 16.1  # cm
 
 # line following
 KEY = 'q'
-ORDER_COLORS_PATH = np.array(["blue", "red", "yellow"])
+ORDER_COLORS_PATH = np.array(["red", "blue", "yellow"])
 SHOW_WINDOWS = False
+RANGE_OFFSET = 0.45
+TIME_OFFSET = 0.1
 # go to
 X = 1
 Y = 1
