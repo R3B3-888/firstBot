@@ -25,10 +25,10 @@ def line_following():
     #Bot = Motion.Motion(ports[0])
     
     while(True):
-        direction = Camera.get_direction(True) # value between -1 (left) and 1 (right) (0 you dont move)
+        direction = Camera.get_direction(SHOW_WINDOWS) # value between -1 (left) and 1 (right) (0 you dont move)
         #Bot.turn(direction)
         if Camera.is_interrupted_key_pressed(KEY):
-            Camera.stop_all()
+            Camera.stop_capturing()
             break
     print("Out")
     
