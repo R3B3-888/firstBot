@@ -63,6 +63,8 @@ class Capture:
 
             self._starting_mask = self._mask_processing(frame, self._lower_starting_color, self._upper_starting_color, True)
 
+            self._switch_color_path()
+
             # Shows the actual image processed
             self._enable_windows(enable_windows)
 
@@ -70,7 +72,10 @@ class Capture:
             if cv.waitKey(1) & 0xFF == ord('q'):
                 break
 
-        capture.release()
+            self._stop_capturing(frame)
+
+    def _stop_capturing(self, frame):
+        frame.release()
         cv.destroyAllWindows()
 
 
@@ -80,13 +85,16 @@ class Capture:
             cv.imshow("Starting_point", self._starting_mask)
 
 
-    def _has_crossed_starting_line(self, frame):
+    def _has_crossed_starting_line(self):
         # calcul de la détection
         # return True
         # turn += 1
-        
+        width = self._starting_mask.shape[0]
+        height = self._starting_mask.shape[1]
 
-        return
+        weight = self._starting_mask[:,:].sum(dtype=np.int32)
+
+        return weight > 1280000
 
 
     def _actualize_mask(self, mask, is_starting_color):
@@ -113,3 +121,10 @@ class Capture:
             hsv[np.where(mask == 0)] = 0
             self._actualize_mask(mask, is_starting_color)
             return mask
+
+    def _switch_color_path(self):
+        if self._has_crossed_starting_line():
+            if len(self._path_color) > 2:
+                np.delete(self._path_color, 0)
+            # else:
+                
